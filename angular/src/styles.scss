@@ -88,3 +88,22 @@
   box-shadow: 0px 3px 5px 0px rgba(110, 116, 116, 0.30);
   color: #313132;
 }
+
+#custom-table .table-title>th {
+  color: var(--subtext, #6E7474);
+  font-family: Inter;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+#custom-table .table-column>td {
+  color: var(--subtext, #6E7474);
+  /* Body text */
+  font-family: Inter;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}

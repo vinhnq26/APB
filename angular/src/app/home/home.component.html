@@ -6,15 +6,19 @@
       <div class="table-title">TASK LIST</div>
     </div>
     <div class="card-body">
-      <input class="w-50" type="text" placeholder="Search" (keyup)="handleFilter($event)"
-        style="min-height: 50px; border-radius: 10px;" />
-      <button class="btn btn-primary float-end mb-2" (click)="handleShowCreate()">Add</button>
+      <div class="search-container position-relative">
+        <input class="input-search mb-2 " type="text" (keyup)="handleFilter($event)" />
+        <img src="../../assets/images/logo/search.png" alt="search" class="iconSearch-custom">
+        <img src="../../assets/images/logo/Line.jpg" alt="Line" class="iconSearch-custom2">
+        <button class="btn btn-primary float-end add-button" (click)="handleShowCreate()">Add</button>
+      </div>
+
 
       <!-- TODO ITEMS LIST -->
       <div class="table-responsive-sm" id="custom-table">
         <table class="table table-hover">
           <thead class="table-success">
-            <tr table-style="Primary">
+            <tr table-style="Primary" class="table-title">
               <th scope="Column text-center" style="border-top-left-radius:15px">Task ID</th>
               <th scope="Column text-center">Task Name</th>
               <th scope="Column text-center">Start Date</th>
@@ -29,7 +33,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr id="TodoList" *ngFor="let taskItem of taskListItems">
+            <tr id="TodoList" *ngFor="let taskItem of taskListItems" class="table-column">
               <td scope="Row">{{taskItem.taskId}}</td>
               <td>{{taskItem.name}}</td>
               <td>{{handleFormatDate(taskItem.startDate)}}</td>
