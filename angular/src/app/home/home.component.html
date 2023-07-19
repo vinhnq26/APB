@@ -1,0 +1,147 @@
+<div class="container">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">TASK LIST</div>
+    </div>
+    <div class="card-body">
+      <button class="btn btn-primary float-end mb-2" (click)="handleShowCreate()">Add</button>
+
+      <!-- TODO ITEMS LIST -->
+
+      <div class="table-responsive-sm">
+        <table class="table table-hover">
+          <thead class="table-success">
+            <tr table-style="Primary">
+              <th scope="Column">Task ID</th>
+              <th scope="Column">Task Name</th>
+              <th scope="Column">Start Date</th>
+              <th scope="Column">Deadline</th>
+              <th scope="Column">End Date</th>
+              <th scope="Column">Assignee</th>
+              <th scope="Column">Progress</th>
+              <th scope="Column">Reporter</th>
+              <th scope="Column">Create Date</th>
+              <th scope="Column">Task Status</th>
+              <th scope="Column">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+
+
+            <tr id="TodoList" *ngFor="let taskItem of taskListItems">
+
+              <th scope="Row">{{taskItem.taskId}}</th>
+              <td>{{taskItem.name}}</td>
+              <td>{{handleFormatDate(taskItem.startDate)}}</td>
+              <td>{{handleFormatDate(taskItem.deadline)}}</td>
+              <td>{{handleFormatDate(taskItem.endDate)}}</td>
+              <td>{{taskItem.assignee}}</td>
+              <td>{{taskItem.progress}}</td>
+              <td>{{taskItem.reporterId}}</td>
+              <td>{{handleFormatDate(taskItem.createDate)}}</td>
+              <td>{{taskItem.taskStatus}}</td>
+
+              <td data-id="@taskItem.Id">
+                <i id="actionbuttonCreate" class="fa fa-pencil-square-o pe-2" (click)="handleOnRowEdit(taskItem)"></i>
+                <i id="actionbuttonDelete" class="fa fa-trash-o"
+                  (click)="isModalOpenDelete = true; getIdDelete = taskItem.id"></i>
+              </td>
+            </tr>
+
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- popup confirm delete -->
+<abp-modal [(visible)]="isModalOpenDelete">
+  <ng-template #abpHeader>
+    <h3>Delete Confirm</h3>
+  </ng-template>
+
+  <ng-template #abpBody>
+    <p>Do you sure delete this item ?</p>
+  </ng-template>
+
+  <ng-template #abpFooter>
+    <button type="button" class="btn btn-outline-primary" abpClose>Cancel</button>
+    <button type="button" class="btn btn-secondary" abpClose (click)="handleDelete(getIdDelete)">Yes</button>
+  </ng-template>
+</abp-modal>
+<!-- popup create/edit -->
+<abp-modal [(visible)]="isModalOpenCreate">
+  <ng-template #abpHeader>
+    <h3>Add New Task</h3>
+  </ng-template>
+
+  <ng-template #abpBody>
+    <form id="book-form" [formGroup]="form" (ngSubmit)="save()">
+      <div class="d-flex justify-content-between">
+        <div class="form-group">
+          <label for="book-type">Project Name</label><span> * </span>
+          <select class="form-control" id="Project_Name" formControlName="Project_Name">
+            <option [ngValue]="null">Select a book type</option>
+            <option [ngValue]="0">Undefined</option>
+            <option [ngValue]="1">Adventure</option>
+            <option [ngValue]="2">Biography</option>
+            <option [ngValue]="3">Fantastic</option>
+            <option [ngValue]="4">Science</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="book-name">Task ID</label><span> * </span>
+          <input type="text" id="Task_ID" class="form-control" formControlName="Task_ID" />
+        </div>
+      </div>
+      <div class="d-flex justify-content-between">
+        <div class="form-group">
+          <label for="book-price">Task Name</label><span> * </span>
+          <input type="text" id="Task_Name" class="form-control" formControlName="Task_Name" />
+        </div>
+
+        <div class="form-group">
+          <label for="book-type">Assignee</label><span> * </span>
+          <select class="form-control" id="Assignee" formControlName="Assignee">
+            <option [ngValue]="null">Select a book type</option>
+            <option [ngValue]="0">Undefined</option>
+            <option [ngValue]="1">Adventure</option>
+            <option [ngValue]="2">Biography</option>
+            <option [ngValue]="3">Fantastic</option>
+            <option [ngValue]="4">Science</option>
+          </select>
+        </div>
+      </div>
+      <div class="d-flex justify-content-between">
+        <div class="form-group">
+          <label for="book-publish-date">Start Date</label><span> * </span>
+          <input id="Start_Date" formControlName="Start_Date" class="form-control" type="date" />
+        </div>
+        <div class="form-group">
+          <label for="book-publish-date">Deadline</label><span> * </span>
+          <input id="Deadline" formControlName="Deadline" class="form-control" type="date" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="book-type">Task Status</label><span> * </span>
+        <select class="form-control" id="Task_Status" formControlName="Task_Status">
+          <option [ngValue]="null">Select a book type</option>
+          <option [ngValue]="0">Undefined</option>
+          <option [ngValue]="1">Adventure</option>
+          <option [ngValue]="2">Biography</option>
+          <option [ngValue]="3">Fantastic</option>
+          <option [ngValue]="4">Science</option>
+        </select>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #abpFooter>
+    <button type="button" class="btn btn-outline-primary" abpClose>Cancel</button>
+    <button form="book-form" class="btn btn-primary" [disabled]="form.invalid || form.pristine">
+      <i class="fa fa-check mr-1"></i>
+      Save
+    </button>
+  </ng-template>
+</abp-modal>
