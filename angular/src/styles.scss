@@ -4,14 +4,17 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
 }
-:root  {
-  --lpx-logo: url('/assets/images/logo/logo-light.png');
-  --lpx-logo-icon: url('/assets/images/logo/logo-light-thumbnail.png');
+
+:root {
+  --lpx-logo: url('/assets/images/logo/wiztechNewLogo_Black-01.png');
+  --lpx-logo-icon: url('/assets/images/logo/wiztechNewLogo_Black-01.png');
 }
+
 .donut {
   display: inline-block;
   border: 4px solid rgba(0, 0, 0, 0.1);
@@ -28,4 +31,60 @@
     transform: translate(-50%, -50%);
   }
 
+}
+
+.lpx-sidebar,
+.lpx-logo-container {
+  background-color: white !important;
+}
+
+.table-title {
+  color: var(--text-color, #313132);
+  /* Heading */
+  font-family: Inter;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+}
+
+#custom-table th {
+  cursor: pointer;
+  height: 83px;
+  text-align: center;
+}
+
+#custom-table td {
+  cursor: pointer;
+  height: 83px;
+}
+
+#TodoList>td {
+  border: 0;
+}
+
+#custom-table>table {
+  border-radius: 15px;
+  border-collapse: collapse;
+  border-style: hidden !important;
+  box-shadow: 0 0 0 1px #666;
+  border: 1px solid var(--subtext, #6E7474);
+}
+
+.lpx-nav-menu .lpx-inner-menu-item .lpx-menu-item-link.selected,
+.lpx-nav-menu .lpx-inner-menu-item .lpx-menu-item-link:hover {
+  background-color: white !important;
+  color: #6E7474;
+}
+
+.lpx-sidebar-container .lpx-sidebar .lpx-nav .lpx-nav-menu {
+  background-color: white !important;
+  color: #6E7474;
+}
+
+.lpx-nav-menu .lpx-menu-item-link.selected {
+  border-radius: 5px;
+  background: #EFEFEF;
+  box-shadow: 0px 3px 5px 0px rgba(110, 116, 116, 0.30);
+  color: #313132;
 }

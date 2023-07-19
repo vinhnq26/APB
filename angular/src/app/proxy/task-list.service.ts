@@ -34,6 +34,15 @@ export class TaskListService {
     { apiName: this.apiName,...config });
   
 
+  searchList = (filter?: string, skipCount?: number, maxResultCount: number = 10, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, TaskListItemDto[]>({
+      method: 'POST',
+      url: '/api/app/task-list/search-list',
+      params: { filter, skipCount, maxResultCount },
+    },
+    { apiName: this.apiName,...config });
+  
+
   update = (id: string, data: TaskListItemModifyDto, config?: Partial<Rest.Config>) =>
     this.restService.request<any, void>({
       method: 'PUT',

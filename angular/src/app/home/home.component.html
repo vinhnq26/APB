@@ -1,36 +1,36 @@
-<div class="container">
-  <div class="card">
+<div class="">
+  <a *ngIf="!hasLoggedIn" (click)="login()" class="px-4 btn btn-primary ml-1" role="button"><i
+      class="fa fa-sign-in"></i> {{ 'AbpAccount::Login' | abpLocalization }}</a>
+  <div class="card" *ngIf="hasLoggedIn">
     <div class="card-header">
-      <div class="card-title">TASK LIST</div>
+      <div class="table-title">TASK LIST</div>
     </div>
     <div class="card-body">
+      <input class="w-50" type="text" placeholder="Search" (keyup)="handleFilter($event)"
+        style="min-height: 50px; border-radius: 10px;" />
       <button class="btn btn-primary float-end mb-2" (click)="handleShowCreate()">Add</button>
 
       <!-- TODO ITEMS LIST -->
-
-      <div class="table-responsive-sm">
+      <div class="table-responsive-sm" id="custom-table">
         <table class="table table-hover">
           <thead class="table-success">
             <tr table-style="Primary">
-              <th scope="Column">Task ID</th>
-              <th scope="Column">Task Name</th>
-              <th scope="Column">Start Date</th>
-              <th scope="Column">Deadline</th>
+              <th scope="Column text-center" style="border-top-left-radius:15px">Task ID</th>
+              <th scope="Column text-center">Task Name</th>
+              <th scope="Column text-center">Start Date</th>
+              <th scope="Column text-center">Deadline</th>
               <th scope="Column">End Date</th>
               <th scope="Column">Assignee</th>
               <th scope="Column">Progress</th>
               <th scope="Column">Reporter</th>
               <th scope="Column">Create Date</th>
               <th scope="Column">Task Status</th>
-              <th scope="Column">Action</th>
+              <th scope="Column" style="border-top-right-radius:15px">Action</th>
             </tr>
           </thead>
           <tbody>
-
-
             <tr id="TodoList" *ngFor="let taskItem of taskListItems">
-
-              <th scope="Row">{{taskItem.taskId}}</th>
+              <td scope="Row">{{taskItem.taskId}}</td>
               <td>{{taskItem.name}}</td>
               <td>{{handleFormatDate(taskItem.startDate)}}</td>
               <td>{{handleFormatDate(taskItem.deadline)}}</td>
@@ -80,7 +80,7 @@
     <form id="book-form" [formGroup]="form" (ngSubmit)="save()">
       <div class="d-flex justify-content-between">
         <div class="form-group">
-          <label for="book-type">Project Name</label><span> * </span>
+          <label for="book-type">Project Name</label><span class="text-required"> * </span>
           <select class="form-control" id="Project_Name" formControlName="Project_Name">
             <option [ngValue]="null">Select a book type</option>
             <option [ngValue]="0">Undefined</option>
@@ -91,18 +91,18 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="book-name">Task ID</label><span> * </span>
+          <label for="book-name">Task ID</label><span class="text-required"> * </span>
           <input type="text" id="Task_ID" class="form-control" formControlName="Task_ID" />
         </div>
       </div>
       <div class="d-flex justify-content-between">
         <div class="form-group">
-          <label for="book-price">Task Name</label><span> * </span>
+          <label for="book-price">Task Name</label><span class="text-required"> * </span>
           <input type="text" id="Task_Name" class="form-control" formControlName="Task_Name" />
         </div>
 
         <div class="form-group">
-          <label for="book-type">Assignee</label><span> * </span>
+          <label for="book-type">Assignee</label><span class="text-required"> * </span>
           <select class="form-control" id="Assignee" formControlName="Assignee">
             <option [ngValue]="null">Select a book type</option>
             <option [ngValue]="0">Undefined</option>
@@ -115,16 +115,16 @@
       </div>
       <div class="d-flex justify-content-between">
         <div class="form-group">
-          <label for="book-publish-date">Start Date</label><span> * </span>
+          <label for="book-publish-date">Start Date</label><span class="text-required"> * </span>
           <input id="Start_Date" formControlName="Start_Date" class="form-control" type="date" />
         </div>
         <div class="form-group">
-          <label for="book-publish-date">Deadline</label><span> * </span>
+          <label for="book-publish-date">Deadline</label><span class="text-required"> * </span>
           <input id="Deadline" formControlName="Deadline" class="form-control" type="date" />
         </div>
       </div>
       <div class="form-group">
-        <label for="book-type">Task Status</label><span> * </span>
+        <label for="book-type">Task Status</label><span class="text-required"> * </span>
         <select class="form-control" id="Task_Status" formControlName="Task_Status">
           <option [ngValue]="null">Select a book type</option>
           <option [ngValue]="0">Undefined</option>

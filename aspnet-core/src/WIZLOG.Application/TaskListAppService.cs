@@ -8,6 +8,7 @@ using Volo.Abp.Domain.Repositories;
 using static Volo.Abp.Identity.Settings.IdentitySettingNames;
 using Volo.Abp.Users;
 using Volo.Abp.ObjectMapping;
+using Scriban.Syntax;
 
 namespace WIZLOG
 {
@@ -97,6 +98,37 @@ namespace WIZLOG
         public async Task DeleteAsync(Guid id)
         {
             await _todoItemRepository.DeleteAsync(id);
+        }
+
+        public async Task<List<TaskListItemDto>> SearchListAsync(string filter = null, int skipCount = 0, int maxResultCount = 10)
+        {
+            // Retrieve the items from the repository based on the filter
+            var items = await _todoItemRepository.GetListAsync();
+
+            // Apply the filter (in this case, we're filtering by the Assignee field)
+            if (!string.IsNullOrEmpty(filter))
+            {
+                items = items.Where(item => item.TaskId.ToLower().Contains(filter.ToLower())).ToList();
+            }
+
+            // Apply the skipCount and maxResultCount to the items list
+            var pagedItems = items.Skip(skipCount).Take(maxResultCount).ToList();
+
+            // Map the filtered and paged items to TaskListItemDto
+            return pagedItems.Select(item => new TaskListItemDto
+            {
+                Id = item.Id,
+                TaskId = item.TaskId,
+                Name = item.Name,
+                StartDate = item.StartDate,
+                Deadline = item.Deadline,
+                EndDate = item.EndDate,
+                Assignee = item.Assignee,
+                ReporterId = item.ReporterId,
+                CreateDate = item.CreateDate,
+                TaskStatus = item.TaskStatus,
+                Progress = item.Progress
+            }).ToList();
         }
     }
 }

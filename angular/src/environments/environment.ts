@@ -7,7 +7,7 @@ export const environment = {
   application: {
     baseUrl,
     name: 'WIZLOG',
-    logoUrl: '',
+    logoUrl: 'assets/images/logo/wiztechNewLogo_Black-01.png',
   },
   oAuthConfig: {
     issuer: 'https://localhost:44337/',

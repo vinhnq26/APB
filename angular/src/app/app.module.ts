@@ -16,6 +16,9 @@ import { AppComponent } from './app.component';
 import { APP_ROUTE_PROVIDER } from './route.provider';
 import { FeatureManagementModule } from '@abp/ng.feature-management';
 import { AbpOAuthModule } from '@abp/ng.oauth';
+import { LogoComponent } from './logo/logo.component';
+import { SharedModule } from './shared/shared.module';
+import { LoginComponent } from './Account/Login/login.component';
 
 @NgModule({
   imports: [
@@ -35,9 +38,10 @@ import { AbpOAuthModule } from '@abp/ng.oauth';
     ThemeLeptonXModule.forRoot(),
     SideMenuLayoutModule.forRoot(),
     FeatureManagementModule.forRoot(),
+    SharedModule
   ],
-  declarations: [AppComponent],
+  declarations: [AppComponent, LogoComponent, LoginComponent],
   providers: [APP_ROUTE_PROVIDER],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }

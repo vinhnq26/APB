@@ -3,8 +3,9 @@ import { Component, Injector, OnInit } from '@angular/core';
 import { TaskListItemDto, TaskListService } from '@proxy';
 import * as moment from 'moment';
 import { AbstractListComponent } from '../shared/component/abstract.component';
-import { ThemeSharedModule } from '@abp/ng.theme.shared';
+import { AuthService } from '@abp/ng.core';
 import { FormBuilder, Validators } from '@angular/forms';
+import { OAuthService } from 'angular-oauth2-oidc';
 
 @Component({
   selector: 'app-home',
@@ -24,10 +25,12 @@ export class HomeComponent
   getIdEdit: string = '';
   isEdit: boolean = false;
   editData: TaskListItemDto | null;
+  skipCount: number = 0;
+  maxResultCount: number = 10;
 
   constructor(injector: Injector,
     private taskListService: TaskListService,
-    private toasterService: ToasterService, private fb: FormBuilder) {
+    private toasterService: ToasterService, private fb: FormBuilder, private oAuthService: OAuthService, private authService: AuthService) {
     super(injector);
   }
 
@@ -37,7 +40,13 @@ export class HomeComponent
     });
   }
 
+  get hasLoggedIn(): boolean {
+    return this.oAuthService.hasValidAccessToken();
+  }
 
+  login() {
+    this.authService.navigateToLogin();
+  }
 
   handleDelete(id: string): void {
     this.taskListService.delete(id).subscribe(() => {
@@ -127,6 +136,16 @@ export class HomeComponent
     };
     this.form.patchValue(taskData as any);
     this.isModalOpenCreate = true
+  }
+
+  handleFilter(value: string) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.taskListService.searchList(filterValue, this.skipCount, this.maxResultCount).subscribe((response) => {
+      console.log("response", response)
+      this.taskListItems = response;
+
+    });
+
   }
 
 }
