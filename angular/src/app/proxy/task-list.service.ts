@@ -1,4 +1,4 @@
-import type { TaskListItemDto, TaskListItemModifyDto } from './models';
+import type { PageDataDto, TaskListItemDto, TaskListItemModifyDto } from './models';
 import { RestService, Rest } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
 
@@ -26,10 +26,11 @@ export class TaskListService {
     { apiName: this.apiName,...config });
   
 
-  getList = (config?: Partial<Rest.Config>) =>
-    this.restService.request<any, TaskListItemDto[]>({
+  getList = (skipCount?: number, maxResultCount: number = 5, pageNumber: number = 1, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, PageDataDto>({
       method: 'GET',
       url: '/api/app/task-list',
+      params: { skipCount, maxResultCount, pageNumber },
     },
     { apiName: this.apiName,...config });
   

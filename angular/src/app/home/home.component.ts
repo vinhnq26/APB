@@ -1,11 +1,12 @@
 import { ToasterService } from '@abp/ng.theme.shared';
 import { Component, Injector, OnInit } from '@angular/core';
-import { TaskListItemDto, TaskListService } from '@proxy';
+import { PageDataDto, TaskListItemDto, TaskListService } from '@proxy';
 import * as moment from 'moment';
 import { AbstractListComponent } from '../shared/component/abstract.component';
 import { AuthService } from '@abp/ng.core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { OAuthService } from 'angular-oauth2-oidc';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-home',
@@ -15,7 +16,7 @@ import { OAuthService } from 'angular-oauth2-oidc';
 export class HomeComponent
   extends AbstractListComponent
   implements OnInit {
-  taskListItems: TaskListItemDto[];
+  taskListItems: any;
   data: TaskListItemDto;
   isModalOpenCreate: boolean = false;
   isModalOpenDelete: boolean = false;
@@ -26,7 +27,10 @@ export class HomeComponent
   isEdit: boolean = false;
   editData: TaskListItemDto | null;
   skipCount: number = 0;
-  maxResultCount: number = 10;
+  maxResultCount: number = 5;
+  currentPage: number = 1;
+  totalPages: number = 1;
+  pages: number[] = [];
 
   constructor(injector: Injector,
     private taskListService: TaskListService,
@@ -35,8 +39,19 @@ export class HomeComponent
   }
 
   ngOnInit(): void {
-    this.taskListService.getList().subscribe(response => {
-      this.taskListItems = response;
+    this.handleGetData();
+    this.generatePages();
+  }
+  generatePages() {
+    for (let page = 0; page <= this.totalPages; page++) {
+      this.pages.push(page);
+    }
+  }
+  handleGetData(page?: number) {
+    this.taskListService.getList(this.skipCount, this.maxResultCount, page).subscribe(response => {
+      this.taskListItems = response.data;
+      this.currentPage = response.currentPage;
+      this.totalPages = response.totalPages;
     });
   }
 
@@ -91,20 +106,14 @@ export class HomeComponent
     }
     if (this.isEdit) {
       this.taskListService.update(this.editData.id, formData).subscribe((result) => {
-        this.taskListService.getList().subscribe(response => {
-          this.taskListItems = response;
-        });
+        this.handleGetData();
         this.isModalOpenCreate = false;
         this.isEdit = false;
         this.editData = null;
       });
     } else {
       this.taskListService.create(formData).subscribe((result) => {
-        // console.log("result", result)
-        // this.taskListItems = this.taskListItems.concat(result);
-        this.taskListService.getList().subscribe(response => {
-          this.taskListItems = response;
-        });
+        this.handleGetData();
         this.isModalOpenCreate = false;
       });
     }
@@ -141,10 +150,71 @@ export class HomeComponent
   handleFilter(value: string) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.taskListService.searchList(filterValue, this.skipCount, this.maxResultCount).subscribe((response) => {
-      console.log("response", response)
       this.taskListItems = response;
 
     });
+
+  }
+
+  exportToExcel(): void {
+    // Define the data
+    const header = ['ID', 'Task ID', 'Name', 'Start Date', 'Deadline', 'End Date', 'Assignee', 'Reporter ID', 'Create Date', 'Task Status', 'Progress'];
+    const data = [header, ...this.taskListItems.map(item => [item.id, item.taskId, item.name, item.startDate, item.deadline, item.endDate, item.assignee, item.reporterId, item.createDate, item.taskStatus, item.progress])];
+
+    // Define styles for the header and cells (columns)
+    const wscols = [
+      { wpx: 250 }, // Set the width of the first column to 100px
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 }, // Set the width of the second column to 200px
+      // Add more width values for other columns if needed
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+
+    // Apply the styles to the worksheet
+    ws['!cols'] = wscols;
+
+    // Set the height of the header row (index 0)
+    ws['!rows'] = [{ hpx: 30 }, ...new Array(data.length - 1).fill({})];
+    // Create a workbook and add the worksheet
+    const wb: XLSX.WorkBook = { Sheets: { 'data': ws }, SheetNames: ['data'] };
+
+    // Convert the workbook to a buffer and save the Excel file
+    const excelBuffer: any = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    this.saveAsExcelFile(excelBuffer, 'data_export');
+  }
+
+  private saveAsExcelFile(buffer: any, fileName: string): void {
+    const data: Blob = new Blob([buffer], { type: 'application/octet-stream' });
+    const url: string = window.URL.createObjectURL(data);
+
+    const a: HTMLAnchorElement = document.createElement('a');
+    a.href = url;
+    a.download = `${fileName}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }
+
+  onFileSelected(event: any) {
+    const file: File = event.target.files[0] as File;
+    console.log("formData", file)
+    this.uploadFile(file);
+
+  }
+
+  uploadFile(file: File) {
+    const formData: FormData = new FormData();
+    formData.append('file', file, file.name);
 
   }
 

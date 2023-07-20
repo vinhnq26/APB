@@ -107,3 +107,30 @@
   font-weight: 400;
   line-height: normal;
 }
+
+.lpx-footbar {
+  display: none !important;
+}
+
+.lpx-topbar-container {
+  background-color: white !important;
+}
+
+#custom-table .page-item:hover:not(:last-child):not(:first-child) {
+  border-radius: 5px;
+  background-color: #313132 !important;
+  padding: 14px 20px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+#custom-table .page-item_selected:not(:last-child):not(:first-child) {
+  background-color: #313132 !important;
+  border: 1px solid;
+}
+
+#custom-table .page-item_selected>li>a {
+  color: white !important;
+}

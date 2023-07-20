@@ -1,4 +1,10 @@
 
+export interface PageDataDto {
+  data: TaskListItemDto[];
+  currentPage: number;
+  totalPages: number;
+}
+
 export interface TaskListItemDto extends TaskListItemModifyDto {
   id?: string;
 }

@@ -22,4 +22,10 @@ namespace WIZLOG
         public int TaskStatus { get; set; }
         public int Progress { get; set; }
     }
+    public class PageDataDto
+    {
+        public List<TaskListItemDto> Data { get; set; }
+        public int CurrentPage { get; set; }
+        public int TotalPages { get; set; }
+    }
 }

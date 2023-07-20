@@ -10,12 +10,18 @@
         <input class="input-search mb-2 " type="text" (keyup)="handleFilter($event)" />
         <img src="../../assets/images/logo/search.png" alt="search" class="iconSearch-custom">
         <img src="../../assets/images/logo/Line.jpg" alt="Line" class="iconSearch-custom2">
-        <button class="btn btn-primary float-end add-button" (click)="handleShowCreate()">Add</button>
+        <div class="d-flex">
+          <input type="file" class="btn btn-primary float-end add-button me-3" (change)="onFileSelected($event)"
+            text="Import">
+          <button class="btn btn-primary float-end add-button me-3" (click)="exportToExcel()">Export</button>
+          <button class="btn btn-primary float-end add-button" (click)="handleShowCreate()">Add</button>
+        </div>
       </div>
 
 
       <!-- TODO ITEMS LIST -->
       <div class="table-responsive-sm" id="custom-table">
+
         <table class="table table-hover">
           <thead class="table-success">
             <tr table-style="Primary" class="table-title">
@@ -32,6 +38,7 @@
               <th scope="Column" style="border-top-right-radius:15px">Action</th>
             </tr>
           </thead>
+          <div *ngIf="!taskListItems">No Data</div>
           <tbody>
             <tr id="TodoList" *ngFor="let taskItem of taskListItems" class="table-column">
               <td scope="Row">{{taskItem.taskId}}</td>
@@ -53,8 +60,31 @@
             </tr>
 
 
+
           </tbody>
+
         </table>
+
+        <nav aria-label="Page navigation example float-right" style="float: right;">
+          <ul class="pagination">
+            <li class="page-item">
+              <a class="page-link" href="#" aria-label="Previous" (click)="handleGetData(currentPage - 1)"
+                [style.pointer-events]="currentPage === 1 ? 'none' : 'auto'">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            <div *ngFor="let item of pages" class="page-item  {{currentPage ===  item + 1 ? 'page-item_selected':''}}">
+              <li><a class="page-link" href="#" (click)="handleGetData(item + 1)">{{item + 1}}</a>
+              </li>
+            </div>
+            <li class="page-item">
+              <a class="page-link" href="#" aria-label="Next" (click)="handleGetData(currentPage + 1)"
+                [style.pointer-events]="currentPage === totalPages ? 'none' : 'auto'">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
   </div>

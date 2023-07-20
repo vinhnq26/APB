@@ -9,9 +9,13 @@ using static Volo.Abp.Identity.Settings.IdentitySettingNames;
 using Volo.Abp.Users;
 using Volo.Abp.ObjectMapping;
 using Scriban.Syntax;
+using System.IO;
+using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace WIZLOG
 {
+
     public class TaskListAppService : ApplicationService, ITaskListService
     {
         private readonly IRepository<TaskListItem, Guid> _todoItemRepository;
@@ -22,11 +26,18 @@ namespace WIZLOG
         }
 
         // TODO: Implement the methods here...
-
-        public async Task<List<TaskListItemDto>> GetListAsync()
+        private int currentPage = 1;
+        public async Task<PageDataDto> GetListAsync(int skipCount = 0, int maxResultCount = 5, int pageNumber = 1)
         {
             var items = await _todoItemRepository.GetListAsync();
-            return items
+            currentPage = pageNumber;
+            int totalPages = (int)Math.Ceiling((double)items.Count / maxResultCount);
+            currentPage = Math.Max(currentPage, 1);
+            currentPage = Math.Min(currentPage, totalPages);
+            // Apply the skipCount and maxResultCount to the items list
+            var skip = (currentPage - 1) * maxResultCount;
+            var pagedItems = items.Skip(skip).Take(maxResultCount).ToList();
+            var pageData = pagedItems
                 .Select(item => new TaskListItemDto
                 {
                     Id = item.Id,
@@ -41,6 +52,12 @@ namespace WIZLOG
                     TaskStatus = item.TaskStatus,
                     Progress = item.Progress
                 }).ToList();
+            return new PageDataDto
+            {
+                Data = pageData,
+                CurrentPage = currentPage,
+                TotalPages = totalPages,
+            };
         }
         
         public async Task<TaskListItemDto> CreateAsync(TaskListItemModifyDto data)
@@ -100,7 +117,7 @@ namespace WIZLOG
             await _todoItemRepository.DeleteAsync(id);
         }
 
-        public async Task<List<TaskListItemDto>> SearchListAsync(string filter = null, int skipCount = 0, int maxResultCount = 10)
+        public async Task<List<TaskListItemDto>> SearchListAsync(string filter = null, int skipCount = 0, int maxResultCount = 5 , int pageNumber = 1)
         {
             // Retrieve the items from the repository based on the filter
             var items = await _todoItemRepository.GetListAsync();
@@ -110,9 +127,10 @@ namespace WIZLOG
             {
                 items = items.Where(item => item.TaskId.ToLower().Contains(filter.ToLower())).ToList();
             }
-
+            currentPage = pageNumber;
+            var skip = (currentPage - 1) * maxResultCount;
             // Apply the skipCount and maxResultCount to the items list
-            var pagedItems = items.Skip(skipCount).Take(maxResultCount).ToList();
+            var pagedItems = items.Skip(skip).Take(maxResultCount).ToList();
 
             // Map the filtered and paged items to TaskListItemDto
             return pagedItems.Select(item => new TaskListItemDto
@@ -129,6 +147,37 @@ namespace WIZLOG
                 TaskStatus = item.TaskStatus,
                 Progress = item.Progress
             }).ToList();
+        }
+        public async Task ImportData(IFormFile file)
+        {
+            if (file.Length == 0)
+            {
+                throw new ArgumentException("No file data found.");
+            }
+
+            try
+            {
+                using (var stream = file.OpenReadStream())
+                using (var reader = new StreamReader(stream))
+                {
+                    var jsonData = reader.ReadToEnd();
+
+                    // Deserialize JSON data into a list of YourDataDto objects.
+                    var data = JsonSerializer.Deserialize<List<TaskListItemDto>>(jsonData);
+
+                    // Convert YourDataDto objects to YourData entities (ABP's Entity Framework entities)
+                    var entities = ObjectMapper.Map<List<TaskListItemDto>, List<TaskListItem>>(data);
+                    Console.WriteLine("entities", entities);
+                    // Save the data to the database using the repository.
+                    //await _todoItemRepository.InsertAsync(entities);
+
+                    // Note: Ensure that YourData entity is properly mapped in the Application project's AutoMapper configuration.
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error importing data: " + ex.Message);
+            }
         }
     }
 }
