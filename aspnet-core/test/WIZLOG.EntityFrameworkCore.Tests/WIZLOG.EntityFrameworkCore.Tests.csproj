@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\WIZLOG.EntityFrameworkCore\WIZLOG.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\WIZLOG.TestBase\WIZLOG.TestBase.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Volo.Abp.EntityFrameworkCore.Sqlite" Version="7.3.0" />
   </ItemGroup>
 

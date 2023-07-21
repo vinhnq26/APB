@@ -11,8 +11,10 @@
         <img src="../../assets/images/logo/search.png" alt="search" class="iconSearch-custom">
         <img src="../../assets/images/logo/Line.jpg" alt="Line" class="iconSearch-custom2">
         <div class="d-flex">
-          <input type="file" class="btn btn-primary float-end add-button me-3" (change)="onFileSelected($event)"
-            text="Import">
+          <label for="fileInput" class="btn btn-primary float-end add-button me-3">
+            Import
+            <input type="file" id="fileInput" style="display: none;" (change)="onFileSelected($event)">
+          </label>
           <button class="btn btn-primary float-end add-button me-3" (click)="exportToExcel()">Export</button>
           <button class="btn btn-primary float-end add-button" (click)="handleShowCreate()">Add</button>
         </div>

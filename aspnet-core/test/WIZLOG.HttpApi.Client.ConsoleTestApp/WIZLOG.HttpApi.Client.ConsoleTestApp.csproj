@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Volo.Abp.Http.Client.IdentityModel" Version="7.3.0" />
     <PackageReference Include="Volo.Abp.Autofac" Version="7.3.0" />
     <ProjectReference Include="..\..\src\WIZLOG.HttpApi.Client\WIZLOG.HttpApi.Client.csproj" />
