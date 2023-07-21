@@ -7,6 +7,8 @@ import { AuthService } from '@abp/ng.core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { OAuthService } from 'angular-oauth2-oidc';
 import * as XLSX from 'xlsx';
+import { HttpHeaders } from '@angular/common/http';
+import { IFormFile } from '@proxy/microsoft/asp-net-core/http';
 
 @Component({
   selector: 'app-home',
@@ -31,6 +33,8 @@ export class HomeComponent
   currentPage: number = 1;
   totalPages: number = 1;
   pages: number[] = [];
+  selectedFile: File | null = null;
+  pagesGenerated: boolean = false;
 
   constructor(injector: Injector,
     private taskListService: TaskListService,
@@ -40,19 +44,24 @@ export class HomeComponent
 
   ngOnInit(): void {
     this.handleGetData();
-    this.generatePages();
   }
-  generatePages() {
-    for (let page = 0; page <= this.totalPages; page++) {
-      this.pages.push(page);
-    }
-  }
-  handleGetData(page?: number) {
+
+  async handleGetData(page?: number) {
     this.taskListService.getList(this.skipCount, this.maxResultCount, page).subscribe(response => {
       this.taskListItems = response.data;
       this.currentPage = response.currentPage;
       this.totalPages = response.totalPages;
+      // Call generatePages() only if it has not been called yet
+      if (!this.pagesGenerated) {
+        this.generatePages();
+        this.pagesGenerated = true;
+      }
     });
+  }
+  async generatePages() {
+    for (let page = 0; page <= this.totalPages - 1; page++) {
+      this.pages.push(page);
+    }
   }
 
   get hasLoggedIn(): boolean {
@@ -83,12 +92,6 @@ export class HomeComponent
     Deadline: [null, [Validators.required]],
     Task_Status: [null, [Validators.required]],
   });
-
-  // create(): void {
-  //   this.taskListService.create(this.data).subscribe((result) => {
-  //     this.taskListItems = this.taskListItems.concat(result);
-  //   });
-  // }
 
   save() {
     if (this.form.invalid) return;
@@ -205,19 +208,26 @@ export class HomeComponent
     window.URL.revokeObjectURL(url);
   }
 
-  onFileSelected(event: any) {
-    const file: File = event.target.files[0] as File;
-    console.log("formData", file)
-    this.uploadFile(file);
+  onFileSelected(event: any): void {
+    this.selectedFile = event.target.files[0] as File;
+    this.uploadFile()
+  }
+  uploadFile(): void {
+    if (!this.selectedFile) {
+      console.error('No file selected.');
+      return;
+    }
+    const formData: any = new FormData();
+    formData.append('file', this.selectedFile, this.selectedFile.name);
 
+    this.taskListService.importDataByFile(formData).subscribe((response) => {
+      console.log("response", response)
+      window.location.reload();
+    },
+      (error) => {
+        console.error('Error uploading file:', error);
+      });
   }
 
-  uploadFile(file: File) {
-    const formData: FormData = new FormData();
-    formData.append('file', file, file.name);
-
-  }
 
 }
-
-

@@ -1,3 +1,4 @@
+import type { IFormFile } from './microsoft/asp-net-core/http/models';
 import type { PageDataDto, TaskListItemDto, TaskListItemModifyDto } from './models';
 import { RestService, Rest } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
@@ -35,11 +36,20 @@ export class TaskListService {
     { apiName: this.apiName,...config });
   
 
-  searchList = (filter?: string, skipCount?: number, maxResultCount: number = 10, config?: Partial<Rest.Config>) =>
+  importDataByFile = (file: IFormFile, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, boolean>({
+      method: 'POST',
+      url: '/api/app/task-list/import-data',
+      body: file,
+    },
+    { apiName: this.apiName,...config });
+  
+
+  searchList = (filter?: string, skipCount?: number, maxResultCount: number = 5, pageNumber: number = 1, config?: Partial<Rest.Config>) =>
     this.restService.request<any, TaskListItemDto[]>({
       method: 'POST',
       url: '/api/app/task-list/search-list',
-      params: { filter, skipCount, maxResultCount },
+      params: { filter, skipCount, maxResultCount, pageNumber },
     },
     { apiName: this.apiName,...config });
   

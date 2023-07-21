@@ -13,6 +13,6 @@ namespace WIZLOG
         Task<TaskListItemDto> CreateAsync(TaskListItemModifyDto data);
         Task DeleteAsync(Guid id);
         Task<List<TaskListItemDto>> SearchListAsync(string filter = null, int skipCount = 0, int maxResultCount = 10 , int pageNumber = 1);
-        Task ImportData(IFormFile file);
+        Task<bool> ImportData(IFormFile file);
     }
 }

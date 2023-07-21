@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
-using static Volo.Abp.Identity.Settings.IdentitySettingNames;
-using Volo.Abp.Users;
-using Volo.Abp.ObjectMapping;
-using Scriban.Syntax;
 using System.IO;
-using System.Text.Json;
 using Microsoft.AspNetCore.Http;
+using ClosedXML.Excel;
+using Microsoft.Extensions.Primitives;
+using Volo.Abp;
 
 namespace WIZLOG
 {
@@ -59,11 +56,12 @@ namespace WIZLOG
                 TotalPages = totalPages,
             };
         }
-        
+
         public async Task<TaskListItemDto> CreateAsync(TaskListItemModifyDto data)
         {
             var taskItem = await _todoItemRepository.InsertAsync(
-                new TaskListItem {
+                new TaskListItem
+                {
                     TaskId = data.TaskId,
                     Name = data.Name,
                     StartDate = data.StartDate,
@@ -75,7 +73,7 @@ namespace WIZLOG
                     Progress = data.Progress
 
                 }
-            );  
+            );
 
             return new TaskListItemDto
             {
@@ -93,9 +91,9 @@ namespace WIZLOG
             };
         }
 
-        public async Task UpdateAsync(Guid id , TaskListItemModifyDto data)
+        public async Task UpdateAsync(Guid id, TaskListItemModifyDto data)
         {
-            var findItem = await _todoItemRepository.GetAsync( id );
+            var findItem = await _todoItemRepository.GetAsync(id);
 
             //Automatically set properties of the user object using the UpdateUserInput
 
@@ -117,7 +115,7 @@ namespace WIZLOG
             await _todoItemRepository.DeleteAsync(id);
         }
 
-        public async Task<List<TaskListItemDto>> SearchListAsync(string filter = null, int skipCount = 0, int maxResultCount = 5 , int pageNumber = 1)
+        public async Task<List<TaskListItemDto>> SearchListAsync(string filter = null, int skipCount = 0, int maxResultCount = 5, int pageNumber = 1)
         {
             // Retrieve the items from the repository based on the filter
             var items = await _todoItemRepository.GetListAsync();
@@ -148,36 +146,97 @@ namespace WIZLOG
                 Progress = item.Progress
             }).ToList();
         }
-        public async Task ImportData(IFormFile file)
+        public async Task<bool> ImportData(IFormFile file)
         {
-            if (file.Length == 0)
-            {
-                throw new ArgumentException("No file data found.");
-            }
-
+            var result = true;
             try
             {
-                using (var stream = file.OpenReadStream())
-                using (var reader = new StreamReader(stream))
+                if (file == null || file.Length <= 0)
                 {
-                    var jsonData = reader.ReadToEnd();
+                    throw new UserFriendlyException("No file uploaded.");
+                }
 
-                    // Deserialize JSON data into a list of YourDataDto objects.
-                    var data = JsonSerializer.Deserialize<List<TaskListItemDto>>(jsonData);
+                // Read the Excel file into a memory stream.
+                using (var memoryStream = new MemoryStream())
+                {
+                    if (file == null || file.Length <= 0)
+                    {
+                        throw new UserFriendlyException("No file uploaded.");
+                    }
 
-                    // Convert YourDataDto objects to YourData entities (ABP's Entity Framework entities)
-                    var entities = ObjectMapper.Map<List<TaskListItemDto>, List<TaskListItem>>(data);
-                    Console.WriteLine("entities", entities);
-                    // Save the data to the database using the repository.
-                    //await _todoItemRepository.InsertAsync(entities);
+                    // Read the Excel file into a memory stream.
+                    using (var fileMemoryStream = new MemoryStream())
+                    {
+                        file.CopyTo(fileMemoryStream);
+                        fileMemoryStream.Position = 0;
 
-                    // Note: Ensure that YourData entity is properly mapped in the Application project's AutoMapper configuration.
+                        // Create a workbook using ClosedXML.
+                        using (var workbook = new XLWorkbook(fileMemoryStream))
+                        {
+                            var worksheet = workbook.Worksheets.FirstOrDefault();
+                            if (worksheet == null)
+                            {
+                                throw new UserFriendlyException("No worksheet found in the Excel file.");
+                            }
+
+                            // Assuming your data starts from the second row (index 2).
+                            int startRow = 2;
+                            int endRow = worksheet.LastRowUsed().RowNumber();
+
+                            //var dataObjects = new List<YourDataObject>();
+
+                            for (int row = startRow; row <= endRow; row++)
+                            {
+                                var TaskId = worksheet.Cell(row, 2).Value.ToString();
+                                var Name = worksheet.Cell(row, 3).Value.ToString();
+                                var StartDate = DateTime.Parse(worksheet.Cell(row, 4).Value.ToString());
+                                var Deadline = DateTime.Parse(worksheet.Cell(row, 5).Value.ToString());
+                                var EndDate = DateTime.Parse(worksheet.Cell(row, 6).Value.ToString());
+                                var Assignee = worksheet.Cell(row, 7).Value.ToString();
+                                var CreateDate = worksheet.Cell(row, 9).Value.ToString();
+                                var TaskStatus = worksheet.Cell(row, 10).Value;
+                                var Progress = worksheet.Cell(row, 11).Value;
+
+                                var dataObject = new YourDataObject
+                                {
+                                    TaskId = TaskId,
+                                    Name = Name,
+                                    StartDate = StartDate,
+                                    Deadline = Deadline,
+                                    EndDate = EndDate,
+                                    Assignee = Assignee,
+                                    CreateDate = CreateDate,
+                                    TaskStatus = (int)TaskStatus,
+                                    Progress = (int)Progress
+                                };
+                                await _todoItemRepository.InsertAsync(
+                 new TaskListItem
+                 {
+                     TaskId = dataObject.TaskId,
+                     Name = dataObject.Name,
+                     StartDate = dataObject.StartDate,
+                     Deadline = dataObject.Deadline,
+                     EndDate = dataObject.EndDate,
+                     Assignee = dataObject.Assignee,
+                     CreateDate = dataObject.CreateDate,
+                     TaskStatus = dataObject.TaskStatus,
+                     Progress = dataObject.Progress
+
+                 }
+             );
+                            }
+
+                        }
+                    }
                 }
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Error importing data: " + ex.Message);
+                result = false;
+                Console.WriteLine(ex.Message);
+
             }
+            return result;
         }
     }
 }
